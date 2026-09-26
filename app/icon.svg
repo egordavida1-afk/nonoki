@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+<title id="title">Nonoki</title><desc id="desc">Nonoki geometric N mark</desc>
+<defs><linearGradient id="g" x1="12" y1="12" x2="84" y2="84" gradientUnits="userSpaceOnUse"><stop stop-color="#71E7D1"/><stop offset="1" stop-color="#8D7CFF"/></linearGradient></defs>
+<rect x="6" y="6" width="84" height="84" rx="24" fill="#0B1018" stroke="#263140" stroke-width="2"/>
+<path d="M27 69V27L69 69V27" fill="none" stroke="url(#g)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="27" cy="27" r="4" fill="#71E7D1"/><circle cx="69" cy="69" r="4" fill="#8D7CFF"/>
+</svg>
