@@ -138,9 +138,9 @@ export default async function HomePage() {
       ) : (
         <section className="home-empty">
           <div className="hero-eyebrow"><span className="hero-dot" /> Nonoki</div>
-          <h1>Твоя медиатека<br />в одном месте.</h1>
-          <p>Добавь тайтлы через админку — они появятся здесь красивыми подборками.</p>
-          <Link href="/catalog" className="hero-button">Открыть каталог</Link>
+          <h1>РўРІРѕСЏ РјРµРґРёР°С‚РµРєР°<br />РІ РѕРґРЅРѕРј РјРµСЃС‚Рµ.</h1>
+          <p>Р”РѕР±Р°РІСЊ С‚Р°Р№С‚Р»С‹ С‡РµСЂРµР· Р°РґРјРёРЅРєСѓ вЂ” РѕРЅРё РїРѕСЏРІСЏС‚СЃСЏ Р·РґРµСЃСЊ РєСЂР°СЃРёРІС‹РјРё РїРѕРґР±РѕСЂРєР°РјРё.</p>
+          <Link href="/catalog" className="hero-button">РћС‚РєСЂС‹С‚СЊ РєР°С‚Р°Р»РѕРі</Link>
         </section>
       )}
 
@@ -160,10 +160,10 @@ export default async function HomePage() {
             <div className="flow-head">
               <div>
                 <div className="flow-kicker"><span className="flow-orb" /> Nonoki FLOW</div>
-                <h2>Продолжайте свою историю</h2>
-                <p>Nonoki собирает следующую часть просмотра из вашей истории и любимых разделов.</p>
+                <h2>РџСЂРѕРґРѕР»Р¶Р°Р№С‚Рµ СЃРІРѕСЋ РёСЃС‚РѕСЂРёСЋ</h2>
+                <p>Nonoki СЃРѕР±РёСЂР°РµС‚ СЃР»РµРґСѓСЋС‰СѓСЋ С‡Р°СЃС‚СЊ РїСЂРѕСЃРјРѕС‚СЂР° РёР· РІР°С€РµР№ РёСЃС‚РѕСЂРёРё Рё Р»СЋР±РёРјС‹С… СЂР°Р·РґРµР»РѕРІ.</p>
               </div>
-              <Link href="/favorites" className="flow-link">Мой список →</Link>
+              <Link href="/favorites" className="flow-link">РњРѕР№ СЃРїРёСЃРѕРє в†’</Link>
             </div>
             <div className="flow-layout">
               {continueWatching[0] ? (
@@ -171,20 +171,20 @@ export default async function HomePage() {
                   <div className="flow-resume-image">
                     <img src={continueWatching[0].posterUrl || fallbackPoster} alt={continueWatching[0].title} />
                     <div className="flow-resume-glow" />
-                    <span className="flow-resume-play">▶</span>
+                    <span className="flow-resume-play">в–¶</span>
                   </div>
                   <div className="flow-resume-copy">
-                    <span className="flow-label">Продолжить</span>
+                    <span className="flow-label">РџСЂРѕРґРѕР»Р¶РёС‚СЊ</span>
                     <h3>{continueWatching[0].title}</h3>
-                    <p>{continueWatching[0].progress?.seasonNumber ? `Сезон ${continueWatching[0].progress.seasonNumber} · ` : ""}Серия {continueWatching[0].progress?.episodeNumber ?? 0}</p>
+                    <p>{continueWatching[0].progress?.seasonNumber ? `РЎРµР·РѕРЅ ${continueWatching[0].progress.seasonNumber} В· ` : ""}РЎРµСЂРёСЏ {continueWatching[0].progress?.episodeNumber ?? 0}</p>
                     <div className="flow-progress-bar"><span style={{ width: `${continueWatching[0].progress?.overallPercent ?? 0}%` }} /></div>
-                    <div className="flow-progress-meta"><span>{continueWatching[0].progress?.overallPercent ?? 0}% просмотрено</span><span>Открыть →</span></div>
+                    <div className="flow-progress-meta"><span>{continueWatching[0].progress?.overallPercent ?? 0}% РїСЂРѕСЃРјРѕС‚СЂРµРЅРѕ</span><span>РћС‚РєСЂС‹С‚СЊ в†’</span></div>
                   </div>
                 </Link>
               ) : (
                 <div className="flow-resume flow-resume-empty">
-                  <div className="flow-empty-symbol">✦</div>
-                  <div><span className="flow-label">Ваш поток пуст</span><h3>Начните смотреть</h3><p>После первого просмотра Nonoki запомнит, где вы остановились.</p></div>
+                  <div className="flow-empty-symbol">вњ¦</div>
+                  <div><span className="flow-label">Р’Р°С€ РїРѕС‚РѕРє РїСѓСЃС‚</span><h3>РќР°С‡РЅРёС‚Рµ СЃРјРѕС‚СЂРµС‚СЊ</h3><p>РџРѕСЃР»Рµ РїРµСЂРІРѕРіРѕ РїСЂРѕСЃРјРѕС‚СЂР° Nonoki Р·Р°РїРѕРјРЅРёС‚, РіРґРµ РІС‹ РѕСЃС‚Р°РЅРѕРІРёР»РёСЃСЊ.</p></div>
                 </div>
               )}
               <div className="flow-picks">
@@ -199,14 +199,14 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        <CatalogRail title="Новинки" href="/catalog" items={latest as CatalogItem[]} />
-        <CatalogRail title="Популярное" href="/catalog" items={popular as CatalogItem[]} />
-        {continueWatching.length > 0 && <CatalogRail title="Продолжить просмотр" href="/catalog" items={continueWatching} showProgress />}
-        {favorites.length > 0 && <CatalogRail title="Мой список" href="/favorites" items={favorites} />}
-        <CatalogRail title="Фильмы" href="/catalog?category=movie" items={movies as CatalogItem[]} />
-        <CatalogRail title="Сериалы" href="/catalog?category=series" items={series as CatalogItem[]} />
-        <CatalogRail title="Аниме" href="/catalog?category=anime" items={anime as CatalogItem[]} />
-        <CatalogRail title="Мультфильмы" href="/catalog?category=cartoon" items={cartoons as CatalogItem[]} />
+        <CatalogRail title="РќРѕРІРёРЅРєРё" href="/catalog" items={latest as CatalogItem[]} />
+        <CatalogRail title="РџРѕРїСѓР»СЏСЂРЅРѕРµ" href="/catalog" items={popular as CatalogItem[]} />
+        {continueWatching.length > 0 && <CatalogRail title="РџСЂРѕРґРѕР»Р¶РёС‚СЊ РїСЂРѕСЃРјРѕС‚СЂ" href="/catalog" items={continueWatching} showProgress />}
+        {favorites.length > 0 && <CatalogRail title="РњРѕР№ СЃРїРёСЃРѕРє" href="/favorites" items={favorites} />}
+        <CatalogRail title="Р¤РёР»СЊРјС‹" href="/catalog?category=movie" items={movies as CatalogItem[]} />
+        <CatalogRail title="РЎРµСЂРёР°Р»С‹" href="/catalog?category=series" items={series as CatalogItem[]} />
+        <CatalogRail title="РђРЅРёРјРµ" href="/catalog?category=anime" items={anime as CatalogItem[]} />
+        <CatalogRail title="РњСѓР»СЊС‚С„РёР»СЊРјС‹" href="/catalog?category=cartoon" items={cartoons as CatalogItem[]} />
       </div>
     </div>
   );
@@ -271,19 +271,19 @@ function ToriiPulse({
   categories: { movie: number; series: number; anime: number; cartoon: number };
 }) {
   const categoryLabels = [
-    ["movie", "Фильмы", categories.movie],
-    ["series", "Сериалы", categories.series],
-    ["anime", "Аниме", categories.anime],
-    ["cartoon", "Мультфильмы", categories.cartoon],
+    ["movie", "Р¤РёР»СЊРјС‹", categories.movie],
+    ["series", "РЎРµСЂРёР°Р»С‹", categories.series],
+    ["anime", "РђРЅРёРјРµ", categories.anime],
+    ["cartoon", "РњСѓР»СЊС‚С„РёР»СЊРјС‹", categories.cartoon],
   ] as const;
   return (
     <section className="pulse-panel">
       <div className="pulse-main">
         <div className="pulse-ring"><span /></div>
         <div>
-          <div className="pulse-kicker">Nonoki PULSE <span>АКТИВНОСТЬ · 15 МИН</span></div>
+          <div className="pulse-kicker">Nonoki PULSE <span>РђРљРўРР’РќРћРЎРўР¬ В· 15 РњРРќ</span></div>
           <strong>{viewers}</strong>
-          <p>{viewers === 1 ? "активный зритель" : "активных зрителей"}</p>
+          <p>{viewers === 1 ? "Р°РєС‚РёРІРЅС‹Р№ Р·СЂРёС‚РµР»СЊ" : "Р°РєС‚РёРІРЅС‹С… Р·СЂРёС‚РµР»РµР№"}</p>
         </div>
       </div>
       <div className="pulse-categories">
@@ -301,7 +301,7 @@ function CatalogRail({ title, href, items, showProgress = false }: { title: stri
     <section className="home-rail">
       <div className="rail-head">
         <h2>{title}</h2>
-        <Link href={href}>Все <span>→</span></Link>
+        <Link href={href}>Р’СЃРµ <span>в†’</span></Link>
       </div>
       <div className="rail-track">
         {items.map((item) => <HomeCard key={item.id} item={item} showProgress={showProgress} />)}
@@ -322,24 +322,24 @@ function HomeCard({ item, showProgress = false }: { item: CatalogItem; showProgr
         <img src={item.posterUrl || fallbackPoster} alt={item.title} loading="lazy" />
         <span className="home-card-overlay" aria-hidden="true" />
         <span className="home-card-tag">{categoryLabel(item.category)}</span>
-        <span className="home-card-play" aria-hidden="true">▶</span>
+        <span className="home-card-play" aria-hidden="true">в–¶</span>
       </div>
       <div className="home-card-title">{item.title}</div>
       <div className="home-card-meta">
         {item.progress ? (
           <>
-            {item.progress.seasonNumber > 0 && <><span>Сезон {item.progress.seasonNumber}</span><span>·</span></>}
-            <span>Серия {item.progress.episodeNumber}</span><span>·</span><span>{progressPercent}% просмотрено</span>
+            {item.progress.seasonNumber > 0 && <><span>РЎРµР·РѕРЅ {item.progress.seasonNumber}</span><span>В·</span></>}
+            <span>РЎРµСЂРёСЏ {item.progress.episodeNumber}</span><span>В·</span><span>{progressPercent}% РїСЂРѕСЃРјРѕС‚СЂРµРЅРѕ</span>
           </>
         ) : (
           <>
-            <span>{item.year ?? "—"}</span><span>·</span><span>{typeLabel(item.type)}</span>
-            {episodes > 0 && <><span>·</span><span>{episodes} серий</span></>}
+            <span>{item.year ?? "вЂ”"}</span><span>В·</span><span>{typeLabel(item.type)}</span>
+            {episodes > 0 && <><span>В·</span><span>{episodes} СЃРµСЂРёР№</span></>}
           </>
         )}
       </div>
       {showProgress && item.progress?.durationSeconds ? (
-        <div className="home-progress" aria-label={`Просмотрено ${progressPercent}%`}>
+        <div className="home-progress" aria-label={`РџСЂРѕСЃРјРѕС‚СЂРµРЅРѕ ${progressPercent}%`}>
           <span style={{ width: `${progressPercent}%` }} />
         </div>
       ) : null}

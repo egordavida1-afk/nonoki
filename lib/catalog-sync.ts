@@ -24,7 +24,7 @@ export async function syncCatalog(): Promise<CatalogSyncResult> {
     }
   }
 
-  if (process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim()) {
+  if (process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_ACCESS_TOKEN?.trim()) {
     try {
       tmdb = await syncTmdbCatalog();
     } catch (error) {

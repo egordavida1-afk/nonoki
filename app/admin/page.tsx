@@ -28,7 +28,7 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
   const kodikUpdated = Number(searchParams.kodikUpdated || 0);
   const kodikAttached = Number(searchParams.kodikAttached || 0);
   const kodikEnabled = process.env.KODIK_AUTO_TOKEN?.trim().toLowerCase() !== "false" || Boolean(process.env.KODIK_API_TOKEN?.trim());
-  const tmdbEnabled = Boolean(process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim());
+  const tmdbEnabled = Boolean(process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_ACCESS_TOKEN?.trim());
   const syncEnabled = kodikEnabled || tmdbEnabled;
 
   return (
@@ -53,7 +53,7 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
         <div className="sync-status-grid">
           <div className={`sync-status ${tmdbEnabled ? "is-on" : ""}`}><strong>TMDB</strong><span>{tmdbEnabled ? "подключён" : "не подключён"}</span></div><div className={`sync-status ${kodikEnabled ? "is-on" : ""}`}><strong>Kodik</strong><span>{kodikEnabled ? "источник просмотра включён" : "не подключён"}</span></div>
         </div>
-        {!syncEnabled && <p className="source-hint">Добавь TMDB_API_READ_ACCESS_TOKEN и/или KODIK_API_TOKEN в переменные окружения.</p>}
+        {!syncEnabled && <p className="source-hint">Добавь TMDB_API_READ_ACCESS_TOKEN (или TMDB_ACCESS_TOKEN) и/или KODIK_API_TOKEN в переменные окружения.</p>}
       </div>
 
       <form className="search-panel admin-search" method="get" action="/admin">

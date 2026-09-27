@@ -34,12 +34,12 @@ type TmdbResponse = { page?: number; total_pages?: number; results?: TmdbListIte
 type TmdbCategory = "movie" | "series" | "cartoon" | "anime";
 
 function token() {
-  return process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim() || "";
+  return process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_ACCESS_TOKEN?.trim() || "";
 }
 
 async function tmdbGet<T>(path: string, params: Record<string, string | number | boolean | undefined> = {}) {
   const accessToken = token();
-  if (!accessToken) throw new Error("TMDB API не настроен: добавь TMDB_API_READ_ACCESS_TOKEN.");
+  if (!accessToken) throw new Error("TMDB API не настроен: добавь TMDB_API_READ_ACCESS_TOKEN или TMDB_ACCESS_TOKEN.");
   const url = new URL(`${TMDB_BASE}${path}`);
   for (const [key, value] of Object.entries(params)) if (value !== undefined) url.searchParams.set(key, String(value));
   const response = await fetch(url, {
