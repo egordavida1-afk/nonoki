@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { createAnime, createGenre, deleteGenre, syncCatalogNow, updateSiteSettings } from "./actions";
+import { createAnime, createGenre, deleteGenre, syncCatalogNow, updateNewRelease, updateSiteSettings } from "./actions";
 import { logout } from "./login/actions";
 import ConfirmButton from "./ConfirmButton";
 import AppearanceForm from "./AppearanceForm";
@@ -8,10 +8,10 @@ import { categoryLabel, searchWhere, typeLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminHome({ searchParams }: { searchParams: { q?: string; category?: string; sync?: string; updated?: string; syncError?: string; movies?: string; series?: string; anime?: string; cartoons?: string; settings?: string; kodikImported?: string; kodikUpdated?: string; kodikAttached?: string; tmdbImported?: string; tmdbUpdated?: string } }) {
+export default async function AdminHome({ searchParams }: { searchParams: { q?: string; category?: string; sync?: string; updated?: string; syncError?: string; movies?: string; series?: string; anime?: string; cartoons?: string; settings?: string; kodikImported?: string; kodikUpdated?: string; kodikAttached?: string } }) {
   const q = searchParams.q?.trim() || "";
   const category = searchParams.category === "movie" || searchParams.category === "series" || searchParams.category === "anime" || searchParams.category === "cartoon" ? searchParams.category : "";
-  const [content, genres, settings] = await Promise.all([
+  const [content, genres, settings, newReleases] = await Promise.all([
     prisma.anime.findMany({
       where: {
         ...(category ? { category } : {}),
@@ -22,14 +22,14 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
     }),
     prisma.genre.findMany({ orderBy: { name: "asc" } }),
     prisma.siteSettings.findUnique({ where: { id: "global" } }),
+    prisma.anime.findMany({ where: { isNew: true }, orderBy: [{ newReleaseOrder: "asc" }, { markedNewAt: "desc" }, { id: "desc" }] }),
   ]);
 
   const kodikImported = Number(searchParams.kodikImported || 0);
   const kodikUpdated = Number(searchParams.kodikUpdated || 0);
   const kodikAttached = Number(searchParams.kodikAttached || 0);
   const kodikEnabled = process.env.KODIK_AUTO_TOKEN?.trim().toLowerCase() !== "false" || Boolean(process.env.KODIK_API_TOKEN?.trim());
-  const tmdbEnabled = Boolean(process.env.TMDB_API_READ_ACCESS_TOKEN?.trim() || process.env.TMDB_API_TOKEN?.trim() || process.env.TMDB_ACCESS_TOKEN?.trim());
-  const syncEnabled = kodikEnabled || tmdbEnabled;
+  const syncEnabled = kodikEnabled;
 
   return (
     <>
@@ -38,7 +38,7 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
         <form action={logout}><button className="btn btn-secondary" type="submit">Выйти</button></form>
       </div>
 
-      {searchParams.sync !== undefined && <div className="form-success">Синхронизация завершена. Kodik: новых {Number.isFinite(kodikImported) ? kodikImported : 0}, обновлено {Number.isFinite(kodikUpdated) ? kodikUpdated : 0}, подключено {Number.isFinite(kodikAttached) ? kodikAttached : 0}. TMDB: новых {searchParams.tmdbImported || 0}, обновлено {searchParams.tmdbUpdated || 0}. Проверено: фильмы {searchParams.movies || 0}, сериалы {searchParams.series || 0}, аниме {searchParams.anime || 0}, мультфильмы {searchParams.cartoons || 0}.</div>}
+      {searchParams.sync !== undefined && <div className="form-success">Синхронизация завершена. Kodik: новых {Number.isFinite(kodikImported) ? kodikImported : 0}, обновлено {Number.isFinite(kodikUpdated) ? kodikUpdated : 0}, подключено {Number.isFinite(kodikAttached) ? kodikAttached : 0}. Проверено: фильмы {searchParams.movies || 0}, сериалы {searchParams.series || 0}, аниме {searchParams.anime || 0}, мультфильмы {searchParams.cartoons || 0}.</div>}
       {searchParams.syncError && <div className="form-error">Часть синхронизации завершилась с ошибкой. Проверь подключённые API и логи Vercel.</div>}
       {searchParams.settings !== undefined && <div className="form-success">Настройки оформления сохранены.</div>}
 
@@ -46,14 +46,14 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
         <div className="panel-head">
           <div>
             <h2>Автозагрузка каталога</h2>
-            <p className="meta">Метаданные фильмов, сериалов и анимации обновляются из TMDB, а Kodik используется отдельно для источников просмотра аниме.</p>
+            <p className="meta">Каталог и источники просмотра синхронизируются через Kodik.</p>
           </div>
           <form action={syncCatalogNow}><button className="btn" type="submit" disabled={!syncEnabled}>Обновить каталог</button></form>
         </div>
         <div className="sync-status-grid">
-          <div className={`sync-status ${tmdbEnabled ? "is-on" : ""}`}><strong>TMDB</strong><span>{tmdbEnabled ? "подключён" : "не подключён"}</span></div><div className={`sync-status ${kodikEnabled ? "is-on" : ""}`}><strong>Kodik</strong><span>{kodikEnabled ? "источник просмотра включён" : "не подключён"}</span></div>
+          <div className={`sync-status ${kodikEnabled ? "is-on" : ""}`}><strong>Kodik</strong><span>{kodikEnabled ? "источник просмотра включён" : "не подключён"}</span></div>
         </div>
-        {!syncEnabled && <p className="source-hint">Добавь TMDB_API_READ_ACCESS_TOKEN (или TMDB_ACCESS_TOKEN) и/или KODIK_API_TOKEN в переменные окружения.</p>}
+        {!syncEnabled && <p className="source-hint">Добавь KODIK_API_TOKEN в переменные окружения.</p>}
       </div>
 
       <form className="search-panel admin-search" method="get" action="/admin">
@@ -101,6 +101,22 @@ export default async function AdminHome({ searchParams }: { searchParams: { q?: 
         </aside>
 
         <div>
+          <div className="panel">
+            <div className="panel-head"><div><h2>Новинки</h2><p className="meta">Выбирай тайтлы вручную. Синхронизация Kodik не меняет этот список.</p></div></div>
+            <div className="admin-new-list">
+              {newReleases.map((a) => (
+                <div className="admin-new-row" key={a.id}>
+                  <div><strong>{a.title}</strong><span>{categoryLabel(a.category)}</span></div>
+                  <form action={updateNewRelease.bind(null, a.id)} className="admin-new-form">
+                    <input name="newReleaseOrder" type="number" min={1} max={9999} defaultValue={a.newReleaseOrder ?? ""} aria-label={`Позиция для ${a.title}`} />
+                    <input type="hidden" name="isNew" value="on" />
+                    <button className="btn btn-secondary" type="submit">Сохранить</button>
+                  </form>
+                </div>
+              ))}
+              {newReleases.length === 0 && <p className="meta">Пока ничего не выбрано. Открой тайтл и включи «Показывать в Новинках».</p>}
+            </div>
+          </div>
           <form action={createAnime} className="panel">
             <h2>Новый контент</h2>
             <div className="field-row">

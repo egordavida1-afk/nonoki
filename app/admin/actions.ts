@@ -81,6 +81,32 @@ export async function createAnime(formData: FormData) {
   redirect(`/admin/anime/${anime.id}`);
 }
 
+export async function updateNewRelease(animeId: string, formData: FormData) {
+  await requireAdminAction();
+  const existing = await prisma.anime.findUnique({ where: { id: animeId }, select: { id: true } });
+  if (!existing) throw new Error("Тайтл не найден");
+
+  const isNew = formData.get("isNew") === "on";
+  const rawOrder = String(formData.get("newReleaseOrder") || "").trim();
+  const parsedOrder = rawOrder ? Number(rawOrder) : null;
+  if (parsedOrder !== null && (!Number.isInteger(parsedOrder) || parsedOrder < 1 || parsedOrder > 9999)) {
+    throw new Error("Позиция в «Новинках» должна быть целым числом от 1 до 9999.");
+  }
+
+  await prisma.anime.update({
+    where: { id: animeId },
+    data: {
+      isNew,
+      newReleaseOrder: isNew ? parsedOrder : null,
+      markedNewAt: isNew ? new Date() : null,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/catalog");
+  revalidatePath(`/admin/anime/${animeId}`);
+}
+
 export async function updateAnime(animeId: string, formData: FormData) {
   await requireAdminAction();
   const existing = await prisma.anime.findUnique({ where: { id: animeId } });
@@ -251,10 +277,8 @@ export async function syncCatalogNow() {
     const kodikImported = result.kodik?.imported || 0;
     const kodikUpdated = result.kodik?.updated || 0;
     const kodikAttached = result.kodik?.attached || 0;
-    const tmdbImported = result.tmdb?.imported || 0;
-    const tmdbUpdated = result.tmdb?.updated || 0;
     const errorFlag = result.errors.length ? "&syncError=1" : "";
-    redirect(`/admin?sync=1&kodikImported=${kodikImported}&kodikUpdated=${kodikUpdated}&kodikAttached=${kodikAttached}&tmdbImported=${tmdbImported}&tmdbUpdated=${tmdbUpdated}&movies=${result.kodik?.movies || result.tmdb?.movies || 0}&series=${result.kodik?.series || result.tmdb?.series || 0}&anime=${result.kodik?.anime || 0}&cartoons=${result.kodik?.cartoons || result.tmdb?.cartoons || 0}${errorFlag}`);
+    redirect(`/admin?sync=1&kodikImported=${kodikImported}&kodikUpdated=${kodikUpdated}&kodikAttached=${kodikAttached}&movies=${result.kodik?.movies || 0}&series=${result.kodik?.series || 0}&anime=${result.kodik?.anime || 0}&cartoons=${result.kodik?.cartoons || 0}${errorFlag}`);
   } catch {
     redirect("/admin?syncError=1");
   }

@@ -65,12 +65,14 @@ export function typeLabel(type: string) {
   return type === "movie" ? "Фильм" : "Сериал";
 }
 
+
 export function categoryLabel(category: string) {
   switch (category) {
     case "movie": return "Фильмы";
     case "series": return "Сериалы";
     case "anime": return "Аниме";
     case "cartoon": return "Мультфильмы";
+    case "3d": return "3D-анимация";
     default: return category;
   }
 }

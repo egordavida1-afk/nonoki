@@ -28,6 +28,9 @@ model Anime {
   shikimoriId   String?
   videoUrl       String?
   kodikUpdatedAt DateTime?
+  isNew          Boolean        @default(false)
+  markedNewAt    DateTime?
+  newReleaseOrder Int?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   seasons        Season[]
@@ -42,6 +45,7 @@ model Anime {
   @@index([kinopoiskId])
   @@index([imdbId])
   @@index([shikimoriId])
+  @@index([isNew, markedNewAt])
 }
 
 model Season {
@@ -165,4 +169,25 @@ model KodikSource {
   @@index([animeId])
   @@index([kodikId])
   @@index([kodikUpdatedAt])
+}
+
+model KodikSyncState {
+  id          String   @id @default(cuid())
+  typeGroup   String   @unique
+  nextPage    String?
+  completed   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
+model SyncState {
+  id              String   @id @default(cuid())
+  source          String   @unique
+  status          String   @default("idle")
+  cursor          String?
+  itemsProcessed  Int      @default(0)
+  lastStartedAt   DateTime?
+  lastCompletedAt DateTime?
+  lastError       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

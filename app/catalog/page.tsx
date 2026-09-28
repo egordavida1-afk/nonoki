@@ -19,7 +19,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: { q?
     prisma.anime.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 25, select: { id: true, slug: true, title: true, originalTitle: true, posterUrl: true, year: true, category: true, type: true } }),
     prisma.anime.count({ where }),
     prisma.genre.findMany({ orderBy: { name: "asc" }, take: 80 }),
-    prisma.anime.findMany({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 8, select: { id: true, slug: true, title: true, posterUrl: true, year: true, category: true, type: true } }),
+    prisma.anime.findMany({ where: { isNew: true }, orderBy: [{ newReleaseOrder: "asc" }, { markedNewAt: "desc" }, { id: "desc" }], take: 8, select: { id: true, slug: true, title: true, posterUrl: true, year: true, category: true, type: true } }),
   ]);
   const initialItems = items.slice(0, 24);
   const hasMore = items.length > 24;

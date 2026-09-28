@@ -42,7 +42,7 @@ export default async function HomePage() {
 
   const pulseSince = new Date(Date.now() - 15 * 60 * 1000);
   const [latest, popular, movies, series, anime, cartoons, favoriteRows, progressRows, pulseRows] = await Promise.all([
-    prisma.anime.findMany({ include, orderBy: { createdAt: "desc" }, take: 12 }),
+    prisma.anime.findMany({ include, where: { isNew: true }, orderBy: [{ newReleaseOrder: "asc" }, { markedNewAt: "desc" }, { id: "desc" }], take: 12 }),
     prisma.anime.findMany({ include, orderBy: [{ favorites: { _count: "desc" } }, { createdAt: "desc" }], take: 12 }),
     prisma.anime.findMany({ include, where: { category: "movie" }, orderBy: { createdAt: "desc" }, take: 12 }),
     prisma.anime.findMany({ include, where: { category: "series" }, orderBy: { createdAt: "desc" }, take: 12 }),

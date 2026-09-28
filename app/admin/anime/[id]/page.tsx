@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { createSeason, createEpisode, deleteAnime, deleteSeason, deleteEpisode, updateAnime } from "../../actions";
+import { createSeason, createEpisode, deleteAnime, deleteSeason, deleteEpisode, updateAnime, updateNewRelease } from "../../actions";
 import ConfirmButton from "../../ConfirmButton";
 import { categoryLabel, typeLabel } from "@/lib/utils";
 
@@ -40,6 +40,16 @@ export default async function AdminAnimePage({ params }: { params: { id: string 
               </div>
             </div>
           )}
+
+          <form action={updateNewRelease.bind(null, anime.id)} className="panel">
+            <h2>Новинки</h2>
+            <p className="meta">Этот статус управляется вручную и не меняется при синхронизации Kodik.</p>
+            <div className="field-row">
+              <label className="check"><input type="checkbox" name="isNew" defaultChecked={anime.isNew} /> <span>Показывать в «Новинках»</span></label>
+              <div className="field"><label>Позиция</label><input name="newReleaseOrder" type="number" min={1} max={9999} defaultValue={anime.newReleaseOrder ?? ""} placeholder="1" /></div>
+            </div>
+            <button className="btn" type="submit">Сохранить «Новинки»</button>
+          </form>
 
           <form action={updateAnime.bind(null, anime.id)} className="panel">
             <h2>Основные данные</h2>

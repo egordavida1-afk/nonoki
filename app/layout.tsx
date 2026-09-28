@@ -53,6 +53,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/catalog?category=cartoon">Мультфильмы</Link>
             </nav>
 
+            <details className="mobile-nav">
+              <summary aria-label="Открыть меню">
+                <span className="mobile-nav-icon" aria-hidden="true"><i /><i /><i /></span>
+                <span>Меню</span>
+              </summary>
+              <div className="mobile-nav-panel">
+                <Link href="/">Главная</Link>
+                <Link href="/catalog?category=movie">Фильмы</Link>
+                <Link href="/catalog?category=series">Сериалы</Link>
+                <Link href="/catalog?category=anime">Аниме</Link>
+                <Link href="/catalog?category=cartoon">Мультфильмы</Link>
+                <Link href="/catalog?category=3d" className="mobile-nav-3d">3D-анимация <span>✦</span></Link>
+              </div>
+            </details>
+
             <div className="header-actions">
               <Link href="/catalog" className="header-search" aria-label="Поиск" title="Поиск">
                 <span aria-hidden="true">⌕</span>
