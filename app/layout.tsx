@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-
+import { Unbounded, Manrope } from "next/font/google";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-auth";
 import { logoutUser } from "./auth/actions";
 import "./globals.css";
 
-
-
+const display = Unbounded({ subsets: ["latin", "cyrillic"], weight: ["500", "700", "900"], variable: "--font-display" });
+const body = Manrope({ subsets: ["latin", "cyrillic"], weight: ["400", "500", "700"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "Nonoki — фильмы, сериалы, аниме и мультфильмы",
@@ -36,13 +36,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="ru">
-      <body style={{ "--accent": accent, "--accent-ink": buttonText } as React.CSSProperties}>
+      <body className={`${display.variable} ${body.variable}`} style={{ "--accent": accent, "--accent-ink": buttonText } as React.CSSProperties}>
         <div className="bg-collage" aria-hidden="true" style={{ backgroundImage: `url("${background}")` }} />
         <div className="site-frame">
           <header className="site-header">
-            <Link href="/" className="brand" aria-label="Nonoki — главная">
-              <span className="brand-logo"><img src="/nonoki-mark.svg" alt="" aria-hidden="true" /></span>
-              <span className="brand-name">NONOKI</span>
+            <Link href="/" className="brand" aria-label="METRA — главная">
+              <img className="metra-logo" src="/metra-logo.svg" alt="METRA" />
             </Link>
 
             <nav className="site-nav" aria-label="Основная навигация">
@@ -52,21 +51,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/catalog?category=anime">Аниме</Link>
               <Link href="/catalog?category=cartoon">Мультфильмы</Link>
             </nav>
-
-            <details className="mobile-nav">
-              <summary aria-label="Открыть меню">
-                <span className="mobile-nav-icon" aria-hidden="true"><i /><i /><i /></span>
-                <span>Меню</span>
-              </summary>
-              <div className="mobile-nav-panel">
-                <Link href="/">Главная</Link>
-                <Link href="/catalog?category=movie">Фильмы</Link>
-                <Link href="/catalog?category=series">Сериалы</Link>
-                <Link href="/catalog?category=anime">Аниме</Link>
-                <Link href="/catalog?category=cartoon">Мультфильмы</Link>
-                <Link href="/catalog?category=3d" className="mobile-nav-3d">3D-анимация <span>✦</span></Link>
-              </div>
-            </details>
 
             <div className="header-actions">
               <Link href="/catalog" className="header-search" aria-label="Поиск" title="Поиск">

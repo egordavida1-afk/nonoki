@@ -214,12 +214,6 @@ function normalizeTitle(value: string) {
 }
 
 async function findExisting(result: KodikResult) {
-  const sourceKey = `kodik:${result.id}`;
-  const bySourceKey = await prisma.anime.findUnique({
-    where: { sourceKey },
-  });
-  if (bySourceKey) return bySourceKey;
-
   if (result.kinopoisk_id) {
     const row = await prisma.anime.findFirst({ where: { kinopoiskId: result.kinopoisk_id } });
     if (row) return row;
@@ -435,141 +429,64 @@ async function fetchRecent(types: string, limit = 24) {
   return response.results || [];
 }
 
-type KodikSyncGroup = {
-  key: "anime" | "movie" | "series" | "cartoon";
-  types: string;
-};
-
-const KODIK_SYNC_GROUPS: KodikSyncGroup[] = [
-  { key: "anime", types: "anime,anime-serial" },
-  { key: "movie", types: "foreign-movie,russian-movie,multi-part-film" },
-  { key: "series", types: "foreign-serial,russian-serial,documentary-serial" },
-  { key: "cartoon", types: "cartoon-serial,foreign-cartoon,russian-cartoon,soviet-cartoon" },
-];
-
-async function fetchKodikBatch(
-  group: KodikSyncGroup,
-  nextPage: string | null,
-  maxPages: number,
-) {
+async function fetchAllPages(types: string, maxPages: number) {
   const results: KodikResult[] = [];
+  let nextPage: string | null = null;
   let page = 0;
-  let currentNextPage = nextPage;
-
   do {
-    const response: KodikResponse = await kodikPost<KodikResponse>(
-      currentNextPage || "/list",
-      currentNextPage
-        ? {}
-        : {
-            limit: 100,
-            types: group.types,
-            sort: "updated_at",
-            order: "desc",
-            with_material_data: true,
-            with_episodes_data: true,
-          },
-    );
-
+    const response: KodikResponse = await kodikPost<KodikResponse>(nextPage || "/list", nextPage ? {} : {
+      limit: 100,
+      types,
+      sort: "updated_at",
+      order: "desc",
+      with_material_data: true,
+      with_episodes_data: true,
+    });
     results.push(...(response.results || []));
-    currentNextPage = response.next_page || null;
+    nextPage = response.next_page || null;
     page += 1;
-  } while (currentNextPage && page < maxPages);
-
-  return {
-    results,
-    nextPage: currentNextPage,
-  };
-}
-
-async function getKodikSyncState(group: KodikSyncGroup) {
-  return prisma.kodikSyncState.upsert({
-    where: { typeGroup: group.key },
-    create: {
-      typeGroup: group.key,
-      nextPage: null,
-      completed: false,
-    },
-    update: {},
-  });
+  } while (nextPage && page < maxPages);
+  return results;
 }
 
 export async function syncKodikCatalog(): Promise<KodikSyncResult> {
-  const maxPages = Math.max(
-    1,
-    Number(process.env.KODIK_SYNC_PAGES_PER_RUN || 2),
-  );
-
+  const animeMaxPages = Math.max(1, Number(process.env.KODIK_ANIME_MAX_PAGES || 50));
+  // Для аниме читаем несколько страниц, чтобы старые тайтлы не зависели от updated_at.
+  // Фильмы/сериалы пока оставляем на свежей выборке: позже их переведём на CDNvideoHub.
+  // Kodik is used here as a viewing-source provider.
+  // The main metadata catalog is supplied by dedicated metadata APIs.
+  const anime = await fetchAllPages("anime,anime-serial", animeMaxPages);
+  const all = anime;
   let imported = 0;
   let updated = 0;
   let attached = 0;
   let episodes = 0;
-  let movies = 0;
-  let series = 0;
-  let anime = 0;
-  let cartoons = 0;
-
-  const groupStates = await Promise.all(
-    KODIK_SYNC_GROUPS.map(async (group) => ({
-      group,
-      state: await getKodikSyncState(group),
-    })),
-  );
-
-  const active = groupStates.find(({ state }) => !state.completed);
-
-  if (active) {
-    const { group, state } = active;
-    const batch = await fetchKodikBatch(
-      group,
-      state.nextPage || null,
-      maxPages,
-    );
-
-    const uniqueIds = new Set<string>();
-
-    for (const result of batch.results) {
-      if (uniqueIds.has(result.id)) continue;
-      uniqueIds.add(result.id);
-
-      const outcome = await applyResult(result);
-
-      if (outcome.kind === "imported") imported += 1;
-      if (outcome.kind === "updated") updated += 1;
-      if (outcome.kind === "attached") attached += 1;
-
-      episodes += outcome.episodes;
-
-      const category = mapCategory(result.type)?.category;
-      if (category === "movie") movies += 1;
-      if (category === "series") series += 1;
-      if (category === "anime") anime += 1;
-      if (category === "cartoon") cartoons += 1;
-    }
-
-    await prisma.kodikSyncState.update({
-      where: { typeGroup: group.key },
-      data: {
-        nextPage: batch.nextPage,
-        completed: !batch.nextPage,
-      },
-    });
+  const uniqueIds = new Set<string>();
+  for (const result of all) {
+    const key = result.id;
+    if (uniqueIds.has(key)) continue;
+    uniqueIds.add(key);
+    const outcome = await applyResult(result);
+    if (outcome.kind === "imported") imported += 1;
+    if (outcome.kind === "updated") updated += 1;
+    if (outcome.kind === "attached") attached += 1;
+    episodes += outcome.episodes;
   }
 
   const translations = await prisma.kodikSource.count();
-
   return {
     imported,
     updated,
     attached,
-    movies,
-    series,
-    anime,
-    cartoons,
+    movies: 0,
+    series: 0,
+    anime: all.filter((x) => mapCategory(x.type)?.category === "anime").length,
+    cartoons: 0,
     translations,
     episodes,
   };
 }
+
 export function kodikSeasons(value: unknown): Array<{ number: number; link: string | null; episodes: Array<{ number: number; link: string; title: string | null }> }> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
   const result: Array<{ number: number; link: string | null; episodes: Array<{ number: number; link: string; title: string | null }> }> = [];

@@ -1,4 +1,4 @@
-import { syncKodikCatalog, type KodikSyncResult } from "@/lib/kodik";
+﻿import { syncKodikCatalog, type KodikSyncResult } from "@/lib/kodik";
 
 export type CatalogSyncResult = {
   kodik: KodikSyncResult | null;
@@ -6,14 +6,10 @@ export type CatalogSyncResult = {
 };
 
 export async function syncCatalog(): Promise<CatalogSyncResult> {
-  const kodikEnabled =
-    process.env.KODIK_AUTO_TOKEN?.trim().toLowerCase() !== "false" ||
-    Boolean(process.env.KODIK_API_TOKEN?.trim());
-
   const errors: string[] = [];
   let kodik: CatalogSyncResult["kodik"] = null;
 
-  if (kodikEnabled) {
+  if (process.env.KODIK_AUTO_TOKEN?.trim()) {
     try {
       kodik = await syncKodikCatalog();
     } catch (error) {
